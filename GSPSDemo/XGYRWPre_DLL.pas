@@ -1,0 +1,90 @@
+unit XGYRWPre_DLL;
+
+interface
+type
+
+  PPoint=^TPoint;
+  TPoint= record
+    X:Single;
+    Y:Single;
+//    X:Integer;
+//    Y:Integer;
+  end;
+  EGraphiType=(GPOINT,GPOLYLINE,GINTERPOLATED,GCIRCLE,GELLIPSE);
+  PDcmGraphicObj = ^TDcmGraphicObj;
+  TDcmGraphicObj = record
+    GraphicAnnotationUnits:Integer;//PIXEL =1;DISPLAY =2;
+    GraphicDimensions:Integer;
+    NumberOfGraphicPoints:Integer;
+    GraphicType: Integer;
+    GraphicFilled:Boolean;        //True:Y;Flase:N
+    GraphicData:array [0..99] of TPoint;
+  end;
+
+
+  ETextLocations=(Left,Center,Right);
+  PDcmTextObj = ^TDcmTextObj;
+  TDcmTextObj = record
+    BoundingBoxAnnotationUnits:Integer;//PIXEL =1;DISPLAY =2;
+    BoundingBoxTopLeftHandCorner:TPoint;
+    BoundingBoxBottomRightHandCorner:TPoint;
+    BoundingBoxTextHorizontalJustification:Integer; //(Left,Center,Right);
+    UnformattedTextValue :array [0..255] of Char;
+  end;
+
+  PDcmSpatialProcessObj = ^TDcmSpatialProcessObj;
+  TDcmSpatialProcessObj = record
+    ImageHorizontalFlip:Boolean;     //True:翻转；Flase：不翻转
+    ImageRotation : Integer;         //旋转角度值
+    Invert:Boolean;                  //是否反相显示
+  end;
+
+  //2016.6.8 Shutter
+  ShutterType=(ENone,ERect,ECircle,EPoly);
+  PDCMShutterObj=^TDCMShutterObj;
+  TDCMShutterObj= record
+    ShutterShap:Integer;
+    ShtLeftVer:Integer;
+    ShtRightVer:Integer;
+    ShtUpperHor:Integer;
+    ShtLowerHor:Integer;
+    ShtCirCenter:TPoint;
+    ShtCirRadius:Integer;
+    ShtPolyPtNum:Integer; ///<100
+    ShtPolyArr:array [0..99] of TPoint;
+    ShtPreValue:Integer;  ///0~65535;
+  end;
+  //2016.6.8 Shutter
+  PDCMPreObj = ^TDCMPreObj;
+  TDCMPreObj = record
+   pre_GraphicObjNum:Integer;     //GraphicObj数组长度
+   ppre_Graphic:Pointer;         //GraphicObj数组指针
+   pre_TextObjNum:Integer;       //TextObj数组长度
+   ppre_Text: Pointer;           //TextObj数组指针
+   pre_Process:TDcmSpatialProcessObj;         //ProcessObj
+   //pre_Shutter:TDCMShutterObj;      //ShutterObj
+  end;
+
+  
+  function XGYPre_WritePreObj(ADcmPath:PChar;PPre:Pointer):LongWord;stdcall;
+    external 'XGYRWPre.dll' name 'XGYPre_WritePreObj';
+//  function XGYPre_WriteGraphicObj(ADcmPath:PChar;PGraphic:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_WriteGraphicObj';
+//  function XGYPre_WriteTextObj(ADcmPath:PChar;PGraphic:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_WriteTextObj';
+//  function XGYPre_WriteProcessObj(ADcmPath:PChar;PGraphic:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_WriteProcessObj';
+
+
+  function XGYPre_ReadPreObj(ADcmPath:PChar;PPre:Pointer):LongWord;stdcall;
+    external 'XGYRWPre.dll' name 'XGYPre_ReadPreObj';
+//  function XGYPre_ReadGraphicObj(APrePath:PChar;var ObjArrLen:Integer;PGraphicArr:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_ReadGraphicObj';
+//  function XGYPre_ReadTextObj(APrePath:PChar;var ObjArrLen:Integer;PTextArr:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_ReadTextObj';
+//  function XGYPre_ReadProcessObj(APrePath:PChar;var ObjArrLen:Integer;PProcessArr:Pointer):LongWord;stdcall;
+//    external 'XGYRWPre.dll' name 'XGYPre_ReadProcessObj';
+
+implementation
+
+end.

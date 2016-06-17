@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2016/05/19 10:12:08.164.pas,C:\Users\xgy-ly\Documents\RAD Studio\Projects\Unit2.pas=C:\Users\xgy-ly\Documents\RAD Studio\Projects\XGYRWPre.pas</Transaction>
+    <Transaction>2016/05/19 10:18:01.608.pas,C:\Users\xgy-ly\Documents\RAD Studio\Projects\XGYRWPre.pas=C:\Users\xgy-ly\Documents\RAD Studio\Projects\XGYRWPre_DLL.pas</Transaction>
+    <Transaction>2016/05/19 10:19:48.618.pas,C:\Users\xgy-ly\Documents\RAD Studio\Projects\XGYRWPre_DLL.pas=F:\20160519\XGYRWPre_DLL.pas</Transaction>
+    <Transaction>2016/05/19 10:19:50.212.pas,C:\Users\xgy-ly\Documents\RAD Studio\Projects\Unit1.pas=F:\20160519\Unit1.pas</Transaction>
+    <Transaction>2016/05/19 10:19:50.212.dfm,C:\Users\xgy-ly\Documents\RAD Studio\Projects\Unit1.dfm=F:\20160519\Unit1.dfm</Transaction>
+    <Transaction>2016/05/19 10:19:51.634.dproj,C:\Users\xgy-ly\Documents\RAD Studio\Projects\Project1.dproj=F:\20160519\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

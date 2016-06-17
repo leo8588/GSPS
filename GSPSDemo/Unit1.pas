@@ -1,0 +1,1080 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, jpeg, ExtCtrls,XGYRWPre_DLL;
+
+type
+  
+  TForm1 = class(TForm)
+    btn_line: TButton;
+    GroupBox1: TGroupBox;
+    btn_rect: TButton;
+    btn_cir: TButton;
+    btn_ellipse: TButton;
+    btn_freeline: TButton;
+    GroupBox2: TGroupBox;
+    btn_rotate: TButton;
+    btn_flip: TButton;
+    btn_invert: TButton;
+    btn_text: TButton;
+    Img_Pre: TImage;
+    GroupBox3: TGroupBox;
+    btn_read_line: TButton;
+    btn_read_rect: TButton;
+    btn_read_circle: TButton;
+    btn_read_ellipse: TButton;
+    btn_read_freeline: TButton;
+    GroupBox4: TGroupBox;
+    btn_read_rotate: TButton;
+    btn_read_flip: TButton;
+    btn_read_invert: TButton;
+    btn_pre: TButton;
+    btn_read_text: TButton;
+    btn_read_pre: TButton;
+    GroupBox5: TGroupBox;
+    Button1: TButton;
+    btn_sht_circle: TButton;
+    btn_sht_poly: TButton;
+    btn_reset: TButton;
+    procedure btn_textClick(Sender: TObject);
+    procedure btn_read_lineClick(Sender: TObject);
+    procedure btn_lineClick(Sender: TObject);
+    procedure Image1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure btn_rectClick(Sender: TObject);
+    procedure btn_read_rectClick(Sender: TObject);
+    procedure btn_read_circleClick(Sender: TObject);
+    procedure btn_cirClick(Sender: TObject);
+    procedure btn_ellipseClick(Sender: TObject);
+    procedure btn_read_ellipseClick(Sender: TObject);
+    procedure btn_freelineClick(Sender: TObject);
+    procedure btn_read_freelineClick(Sender: TObject);
+    procedure btn_read_flipClick(Sender: TObject);
+    procedure btn_read_rotateClick(Sender: TObject);
+    procedure btn_rotateClick(Sender: TObject);
+    procedure btn_read_invertClick(Sender: TObject);
+    procedure btn_flipClick(Sender: TObject);
+    procedure btn_invertClick(Sender: TObject);
+    procedure btn_read_textClick(Sender: TObject);
+    procedure btn_preClick(Sender: TObject);
+    procedure btn_read_preClick(Sender: TObject);
+    procedure Img_PreMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Img_PreMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Img_PreMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure Button1Click(Sender: TObject);
+    procedure btn_sht_circleClick(Sender: TObject);
+    procedure btn_sht_resetClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure btn_sht_polyClick(Sender: TObject);
+  private
+    { Private declarations }
+    m_GraphicArr:array of TDcmGraphicObj;
+    m_ObjArrLen:Integer;
+    m_Process:TDcmSpatialProcessObj;
+    m_TextObjArrLen:Integer;
+    m_Text:array of TDcmTextObj;
+    m_Pre:TDCMPreObj;
+    m_ShutterType:ShutterType;
+    m_StartPt:TPoint;
+    m_FinalPt:TPoint;
+    m_polyPt:array  [0..99] of TPoint;
+    m_polyPtNum:Integer;
+    m_ShtHrgn:HRGN;
+    procedure InitForm();
+    procedure RotateBmp(Const Bitmap:TBitmap; Aindex:Integer);
+    procedure Imgflip(Const Bitmap:TBitmap; Aindex:Integer);
+    procedure ImgIvert(Const Bitmap:TBitmap);
+  public
+    { Public declarations }
+      
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.Image1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  ShowMessage(IntToStr(X)+','+IntToStr(Y));
+end;
+
+procedure TForm1.InitForm();
+begin
+  Img_Pre.Canvas.Brush.Color:=clBlack;
+  Img_Pre.Canvas.FillRect(Rect(0,0,Img_Pre.Picture.Bitmap.Width,Img_Pre.Picture.Height));
+  Img_Pre.Canvas.Pen.Color:=clRed;
+  Img_Pre.Canvas.Pen.Style:=psDot;
+  m_ShutterType:=ENone;
+end;
+
+procedure TForm1.btn_cirClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+begin
+  m_ObjArrLen:=2;
+  Setlength(m_GraphicArr,m_ObjArrLen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=2;
+    TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GCIRCLE);
+//    for J := 0 to TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints - 1 do
+//    begin
+//      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X:=(I+1)*100+J*200;
+//      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y:=(I+1)*100+J*250;
+//    end;
+
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=(I+1)*100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=(I+1)*100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=(I+1)*200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=(I+1)*200;
+  end;
+end;
+
+procedure TForm1.btn_ellipseClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+begin
+  m_ObjArrLen:=2;
+  Setlength(m_GraphicArr,m_ObjArrLen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=2;
+    TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GCIRCLE);
+//    for J := 0 to TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints - 1 do
+//    begin
+//      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X:=(I+1)*100+J*200;
+//      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y:=(I+1)*100+J*250;
+//    end;
+
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=(I+1)*100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=(I+1)*100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=(I+1)*400;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=(I+1)*200;
+  end;
+
+end;
+
+procedure TForm1.btn_flipClick(Sender: TObject);
+begin
+  m_Process.ImageHorizontalFlip:=True;
+end;
+
+procedure TForm1.btn_freelineClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+begin
+  m_ObjArrLen:=2;
+  Setlength(m_GraphicArr,m_ObjArrLen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    //TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=POLYLINE;
+    TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=5;
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=200*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=150*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=150*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).X:=300*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).Y:=400*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).Y:=400*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).Y:=200*(I+2);
+  end;
+
+end;
+
+procedure TForm1.btn_invertClick(Sender: TObject);
+begin
+  m_Process.Invert:=True;
+end;
+
+procedure TForm1.btn_lineClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+begin
+  m_ObjArrLen:=2;
+  Setlength(m_GraphicArr,m_ObjArrLen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=2;
+    TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GPOLYLINE);
+    for J := 0 to TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints - 1 do
+    begin
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X:=(I+1)*100+J*200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y:=(I+1)*100+J*250;
+    end;
+  end;
+
+end;
+
+procedure TForm1.btn_preClick(Sender: TObject);
+var
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  res:LongWord;
+begin
+//    m_Pre.pre_GraphicObjNum:=0;
+//    m_Pre.ppre_Graphic:=nil;
+  m_Pre.pre_GraphicObjNum:=8;
+  Setlength(m_GraphicArr,m_Pre.pre_GraphicObjNum);
+  for I := 0 to m_Pre.pre_GraphicObjNum - 1 do
+  begin
+    TDcmGraphicObj(m_GraphicArr[I]).GraphicAnnotationUnits:=1;
+    TDcmGraphicObj(m_GraphicArr[I]).GraphicDimensions:=2;
+    if I<2 then
+    begin
+      TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=2;
+      TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GPOLYLINE);
+      for J := 0 to TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints - 1 do
+      begin
+        TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X:=(I+1)*100+J*200;
+        TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y:=(I+1)*100+J*250;
+      end;
+    end;
+    if (2<=I) and (I<4) then
+    begin
+      TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GPOLYLINE);
+      TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=5;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=100+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=200+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=300+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=200+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).X:=300+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).Y:=400+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).X:=100+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).Y:=400+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).X:=100+10*(I+1);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).Y:=200+10*(I+1);
+    end;
+    if (4<=I) and (I<6) then
+    begin
+      TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=2;
+      TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GCIRCLE);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=(I+1)*10+100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=(I+1)*10+100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=(I+1)*10+200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=(I+1)*10+200;
+    end;
+    if (6<=I) and (I<8) then
+    begin
+      TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=4;
+      TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=Integer(GELLIPSE);
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=100;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=300;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).X:=200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).Y:=150;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).X:=200;
+      TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).Y:=250;
+    end;    
+  end;
+  m_Pre.ppre_Graphic:=m_GraphicArr;
+  //Write Text
+  m_Pre.pre_TextObjNum:=1;
+  SetLength(m_Text,m_Pre.pre_TextObjNum);
+  for I := 0 to m_Pre.pre_TextObjNum - 1 do
+  begin
+    with m_Text[I] do
+    begin
+      BoundingBoxAnnotationUnits:=1;
+      StrCopy(UnformattedTextValue,'IHE TEST');
+      BoundingBoxTopLeftHandCorner.X:=100;
+      BoundingBoxTopLeftHandCorner.Y:=100;
+      BoundingBoxBottomRightHandCorner.X:=200;
+      BoundingBoxBottomRightHandCorner.Y:=200;
+      BoundingBoxTextHorizontalJustification:=1; //(Left,Center,Right);
+    end;
+  end;
+
+  m_Pre.ppre_Text:=m_Text;
+  //Process
+
+  m_Pre.pre_Process.ImageHorizontalFlip:=False;
+  m_Pre.pre_Process.ImageRotation:=90;
+  m_Pre.pre_Process.Invert:=True;
+
+//  m_Pre.pre_Shutter.ShutterShap:=Integer(ERect);
+//  m_Pre.pre_Shutter.ShtLeftVer:=100;
+//  m_Pre.pre_Shutter.ShtRightVer:=300;
+//  m_Pre.pre_Shutter.ShtUpperHor:=100;
+//  m_Pre.pre_Shutter.ShtLowerHor:=300;
+//  m_Pre.pre_Shutter.ShtPreValue:=0;
+
+  res:=XGYPre_WritePreObj('1.dcm',@m_Pre);
+  if  res <> 0 then
+  begin
+    ShowMessage(IntToStr(res));
+  end;
+
+end;
+
+procedure TForm1.btn_read_circleClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen,hbrush:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  //hbrush:=CreateSolidBrush()
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_XORPEN);
+
+  SelectObject(hdc,  hpen);
+
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+      Ellipse(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y));
+  end;
+  self.Refresh;
+
+end;
+
+procedure TForm1.btn_read_ellipseClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen,hbrush:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  //hbrush:=CreateSolidBrush()
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_XORPEN);
+
+  SelectObject(hdc,  hpen);
+
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+      Ellipse(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).Y),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).Y));
+  end;
+  self.Refresh;
+
+end;
+
+procedure TForm1.btn_read_flipClick(Sender: TObject);
+begin
+  if m_Process.ImageHorizontalFlip then
+   Imgflip(Img_Pre.Picture.Bitmap,1);
+end;
+
+procedure TForm1.btn_read_freelineClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_BLACK);
+  SelectObject(hdc,  hpen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    for J := 0 to (TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints) - 1 do
+    begin
+      //Img_Pre.Picture.Bitmap.Canvas.LineTo(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X,
+      //                                     TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y);
+      if (J=0) then
+      begin
+        MoveToEx(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+                      Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y),nil);
+      end
+      else
+      begin
+         LineTo(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y));
+      end;
+    end;
+
+  end;
+  self.Refresh;
+
+end;
+
+procedure TForm1.btn_read_invertClick(Sender: TObject);
+begin
+  if m_Process.Invert then
+  begin
+    ImgIvert(Img_Pre.Picture.Bitmap);
+  end;
+
+end;
+
+procedure TForm1.btn_read_lineClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_BLACK);
+  SelectObject(hdc,  hpen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    for J := 0 to (TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints) - 1 do
+    begin
+      //Img_Pre.Picture.Bitmap.Canvas.LineTo(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X,
+      //                                     TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y);
+      if (J=0) then
+      begin
+        MoveToEx(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+                      Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y),nil);
+      end
+      else
+      begin
+         LineTo(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y));
+      end;
+
+    end;
+
+  end;
+  self.Refresh;
+
+
+end;
+
+procedure TForm1.btn_read_preClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcTextArr:array of TDcmTextObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen:THandle;
+  hdc:THandle;
+  res:LongWord;
+begin
+  lcPrePath:='1.pre';
+  //XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+  res:=XGYPre_ReadPreObj(PChar(lcPrePath),@m_Pre);
+  if res<>0 then ShowMessage('Read Pre failed!');
+  //copymemory(@m_Pre,PPre,sizeof(TDCMPreObj));
+
+  hpen:=CreatePen(PS_SOLID,3,clRed);
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_MASKPEN);
+  SelectObject(hdc,  hpen);
+  if m_Pre.pre_GraphicObjNum>0 then
+  begin
+    SetLength(lcGraphicArr,m_Pre.pre_GraphicObjNum);
+    CopyMemory(lcGraphicArr,m_Pre.ppre_Graphic,m_Pre.pre_GraphicObjNum*SizeOf(TDcmGraphicObj));
+  end;
+  for I := 0 to m_Pre.pre_GraphicObjNum - 1 do
+  begin
+    case lcGraphicArr[I].GraphicType of
+      Integer(GPOLYLINE):
+      begin
+        for J := 0 to (lcGraphicArr[I].NumberOfGraphicPoints) - 1 do
+        begin
+          if (J=0) then
+          begin
+            MoveToEx(hdc,Trunc(TPoint(lcGraphicArr[I].GraphicData[J]).X),
+                          Trunc(TPoint(lcGraphicArr[I].GraphicData[J]).Y),nil);
+          end
+          else
+          begin
+            LineTo(hdc,Trunc(TPoint(lcGraphicArr[I].GraphicData[J]).X),
+                  Trunc(TPoint(lcGraphicArr[I].GraphicData[J]).Y));
+          end;
+        end;
+      end;
+      Integer(GCIRCLE):
+      begin
+        SetROP2(hdc, R2_MASKPEN);
+        SelectObject(hdc,  hpen);
+        SetBkMode(hdc,TRANSPARENT);
+        Ellipse(hdc,Trunc(TPoint(lcGraphicArr[I].GraphicData[0]).X),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[0]).Y),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[1]).X),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[1]).Y));
+      end;
+      Integer(GELLIPSE):
+      begin
+        SetROP2(hdc, R2_MASKPEN);
+        SelectObject(hdc,  hpen);
+        Ellipse(hdc,Trunc(TPoint(lcGraphicArr[I].GraphicData[0]).X),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[2]).Y),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[1]).X),
+                Trunc(TPoint(lcGraphicArr[I].GraphicData[3]).Y));
+      end;
+      Integer(GPOINT):
+      begin
+
+      end;
+      Integer(GINTERPOLATED):
+      begin
+      
+      end;
+    end;
+  end;
+  //Text
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  SetROP2(hdc, R2_BLACK);
+  SelectObject(hdc,  hpen);
+  SetBkMode(hdc,TRANSPARENT);
+  if m_Pre.pre_TextObjNum>0 then
+  begin
+    SetLength(lcTextArr,m_Pre.pre_TextObjNum);
+    CopyMemory(lcTextArr,m_Pre.ppre_Text,m_Pre.pre_TextObjNum*SizeOf(TDcmTextObj));
+  end;   
+  for I := 0 to m_Pre.pre_TextObjNum - 1 do
+  begin
+    TextOut(hdc,Trunc(lcTextArr[I].BoundingBoxTopLeftHandCorner.X),
+              Trunc(lcTextArr[I].BoundingBoxTopLeftHandCorner.Y),
+              lcTextArr[I].UnformattedTextValue,
+              Length(lcTextArr[I].UnformattedTextValue));
+
+  end;
+  //Spatial Process
+
+//  //Shutter
+//  case ShutterType(m_Pre.pre_Shutter.ShutterShap) of
+//    ERect:
+//    begin
+//      m_ShtHrgn:=CreateRectRgn(m_Pre.pre_Shutter.ShtLeftVer,m_Pre.pre_Shutter.ShtUpperHor,
+//                               m_Pre.pre_Shutter.ShtRightVer,m_Pre.pre_Shutter.ShtLowerHor);
+//    end;
+//    ECircle:
+//    begin
+//      m_ShtHrgn:=CreateEllipticRgn(m_Pre.pre_Shutter.ShtCirCenter.X-m_pre.pre_Shutter.ShtCirRadius,
+//                                   m_Pre.pre_Shutter.ShtCirCenter.Y-m_pre.pre_Shutter.ShtCirRadius,
+//                                   m_Pre.pre_Shutter.ShtCirCenter.X+m_pre.pre_Shutter.ShtCirRadius,
+//                                   m_Pre.pre_Shutter.ShtCirCenter.Y+m_pre.pre_Shutter.ShtCirRadius);
+//    end;
+//    EPoly:
+//    begin
+//      m_ShtHrgn:=CreatePolygonRgn(m_Pre.pre_Shutter.ShtPolyArr,m_Pre.pre_Shutter.ShtPolyPtNum ,WINDING);
+//
+//    end;
+//  end;
+//  if m_Pre.pre_Shutter.ShutterShap<>Integer(ENone) then
+//  begin
+//    for I := 0 to Img_Pre.Width - 1 do
+//      for J := 0 to Img_Pre.Height - 1 do
+//      begin
+//        if not PtInRegion(m_ShtHrgn,I,J) then
+//         Img_Pre.Canvas.Pixels[I,J]:=clBlack;
+//      end;
+//  end;
+  self.Refresh;
+
+end;
+
+procedure TForm1.btn_read_rectClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_BLACK);
+  SelectObject(hdc,  hpen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    for J := 0 to (TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints) - 1 do
+    begin
+      //Img_Pre.Picture.Bitmap.Canvas.LineTo(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X,
+      //                                     TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y);
+      if (J=0) then
+      begin
+        MoveToEx(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+                      Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y),nil);
+      end
+      else
+      begin
+         LineTo(hdc,Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).X),
+              Trunc(TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[J]).Y));
+      end;
+
+    end;
+
+  end;
+  self.Refresh; 
+end;
+
+procedure TForm1.btn_read_rotateClick(Sender: TObject);
+begin
+  if m_Process.ImageRotation <> 0 then
+  begin
+    RotateBmp(Img_Pre.Picture.Bitmap,Trunc(m_Process.ImageRotation/90));
+  end;
+end;
+
+procedure TForm1.btn_read_textClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+  hpen:THandle;
+  hdc:THandle;
+begin
+//  lcPrePath:='1.pre';
+//  XGYPre_ReadGraphicObj(PChar(lcPrePath),lcObjArrLen,PGraphicArr);
+//  Setlength(lcGraphicArr,lcObjArrLen);
+//  copymemory(lcGraphicArr,PGraphicArr,sizeof(lcGraphicArr));
+
+  hpen:=CreatePen(PS_SOLID,3,clred);
+  hdc :=Img_Pre.Canvas.handle;
+  SetROP2(hdc, R2_BLACK);
+  SelectObject(hdc,  hpen);
+  SetBkMode(hdc,TRANSPARENT);
+  for I := 0 to m_TextObjArrLen - 1 do
+  begin
+    TextOut(hdc,Trunc(m_Text[I].BoundingBoxTopLeftHandCorner.X),
+              Trunc(m_Text[I].BoundingBoxTopLeftHandCorner.Y),
+              m_Text[I].UnformattedTextValue,
+              Length(m_Text[I].UnformattedTextValue));
+
+  end;
+
+  self.Refresh;
+end;
+
+procedure TForm1.btn_rectClick(Sender: TObject);
+var
+  lcGraphicArr:array of TDcmGraphicObj;
+  lcPrePath:string;
+  lcObjArrLen:Integer;
+  PGraphicArr:Pointer;
+  I,J: Integer;
+begin
+  m_ObjArrLen:=2;
+  Setlength(m_GraphicArr,m_ObjArrLen);
+  for I := 0 to m_ObjArrLen - 1 do
+  begin
+    //TDcmGraphicObj(m_GraphicArr[I]).GraphicType:=POLYLINE;
+    TDcmGraphicObj(m_GraphicArr[I]).NumberOfGraphicPoints:=5;
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[0]).Y:=200*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).X:=300*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[1]).Y:=200*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).X:=300*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[2]).Y:=400*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[3]).Y:=400*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).X:=100*(I+2);
+    TPoint(TDcmGraphicObj(m_GraphicArr[I]).GraphicData[4]).Y:=200*(I+2);
+  end;
+
+end;
+
+procedure TForm1.btn_rotateClick(Sender: TObject);
+begin
+  m_Process.ImageHorizontalFlip:=False;
+  m_Process.ImageRotation:=90;
+end;
+
+procedure TForm1.btn_sht_circleClick(Sender: TObject);
+begin
+  m_ShutterType:=ECircle;
+end;
+
+procedure TForm1.btn_sht_polyClick(Sender: TObject);
+begin
+   m_ShutterType:=EPoly;
+end;
+
+procedure TForm1.btn_sht_resetClick(Sender: TObject);
+begin
+  m_ShutterType:=ENone;
+  m_ShtHrgn:=0;
+  m_polyPtNum:=0;
+  Img_Pre.Picture.Bitmap.LoadFromFile('1.bmp');
+end;
+
+procedure TForm1.btn_textClick(Sender: TObject);
+var
+  list :TList;
+  I: Integer;
+begin
+  m_TextObjArrLen:=1;
+  SetLength(m_Text,m_TextObjArrLen);
+  for I := 0 to m_TextObjArrLen - 1 do
+  begin
+    with m_Text[I] do
+    begin
+      BoundingBoxAnnotationUnits:=1;
+      StrCopy(UnformattedTextValue,'IHE TEST');
+      BoundingBoxTopLeftHandCorner.X:=100;
+      BoundingBoxTopLeftHandCorner.Y:=100;
+      BoundingBoxBottomRightHandCorner.X:=200;
+      BoundingBoxBottomRightHandCorner.Y:=200;
+      BoundingBoxTextHorizontalJustification:=1; //(Left,Center,Right);
+    end;
+  end;
+
+
+end;
+
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  m_ShutterType:=ERect;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  m_ShutterType:=ENone;
+  m_polyPtNum:=0;
+end;
+
+procedure TForm1.RotateBmp(Const Bitmap:TBitmap; Aindex:Integer);
+var
+  i,j:Integer;
+  rowIn,rowOut:pRGBTriple;
+  Bmp:TBitmap;
+  Width,Height:Integer;
+begin
+  Bmp:=TBitmap.Create;
+  Bmp.PixelFormat:=pf24bit;
+  case Aindex of
+    1:
+    begin
+      Bmp.Width:=Bitmap.Height;
+      Bmp.Height:=Bitmap.Width;
+      Width:=Bitmap.Width-1;
+      Height:=Bitmap.Height-1;
+      for J := 0 to Height do
+      begin
+        rowIn:=Bitmap.ScanLine[j];
+        for I := 0 to Width do
+        begin
+          rowOut:=Bmp.ScanLine[i];
+          Inc(rowOut,Height-j);
+          rowOut^:=rowIn^;
+          Inc(rowIn);
+        end;
+      end;
+    end;
+    2:
+    begin
+      Bmp.Width:=Bitmap.Width;
+      Bmp.Height:=Bitmap.Height;
+      Width:=Bitmap.Width-1;
+      Height:=Bitmap.Height-1;
+      for J := 0 to Height do
+      begin
+        rowIn:=Bitmap.ScanLine[j];
+        rowOut:=Bmp.ScanLine[Height-j];
+        for I := 0 to Width do
+        begin
+          rowOut^:=rowIn^;
+          Inc(rowIn);
+          Inc(rowOut);
+        end;
+      end;
+    end;
+    3:
+    begin
+      Bmp.Width:=Bitmap.Height;
+      Bmp.Height:=Bitmap.Width;
+      Width:=Bitmap.Width-1;
+      Height:=Bitmap.Height-1;
+      for J := 0 to Height do
+      begin
+        rowIn:=Bitmap.ScanLine[j];
+        for I := 0 to Width do
+        begin
+          rowOut:=Bmp.ScanLine[Width-i];
+          Inc(rowOut,J);
+          rowOut^:=rowIn^;
+          Inc(rowIn);
+        end;
+      end;
+    end;
+  end;
+  Bitmap.Assign(Bmp);
+  Bmp.Free;
+end;
+
+//Í¼Ïñ¾µÏñ£¬1£¬Ë®Æ½¾µÏñ£»2£¬´¹Ö±¾µÏñ
+procedure TForm1.Imgflip(Const Bitmap:TBitmap; Aindex:Integer);
+var
+  I,J:Integer;
+  rowIn,rowOut:pRGBTriple;
+  Bmp:TBitmap;
+  Width,Height:Integer;
+begin
+  Bmp:=TBitmap.Create;
+  Bmp.PixelFormat:=pf24bit;
+  case Aindex of
+    1:
+    begin
+      Bmp.Width:=Bitmap.Width;
+      Bmp.Height:=Bitmap.Height;
+      Width:=Bitmap.Width-1;
+      Height:=Bitmap.Height-1;
+      for J := 0 to Height do
+      begin
+        rowIn:=Bitmap.ScanLine[j];
+        for I := 0 to Width do
+        begin
+          rowOut:=Bmp.ScanLine[j];
+          Inc(rowOut,Width-i);
+          rowOut^:=rowIn^;
+          Inc(rowIn);
+        end;
+      end;
+    end;
+    2:
+    begin
+      Bmp.Width:=Bitmap.Width;
+      Bmp.Height:=Bitmap.Height;
+      Width:=Bitmap.Width-1;
+      Height:=Bitmap.Height-1;
+      for J := 0 to Height do
+      begin
+        rowIn:=Bitmap.ScanLine[j];
+        rowOut:=Bmp.ScanLine[Height-j];
+        for I := 0 to Width do
+        begin
+          rowOut^:=rowIn^;
+          Inc(rowOut);
+          Inc(rowIn);
+        end;
+      end;
+    end;
+  end;
+  Bitmap.Assign(Bmp);
+  Bmp.Free;
+end;
+
+procedure TForm1.ImgIvert(Const Bitmap:TBitmap);
+var
+  i,j:Integer;
+  rowIn,rowOut:pRGBTriple;
+  Bmp:TBitmap;
+  Width,Height:Integer;
+begin
+  Bmp:=TBitmap.Create;
+  Bmp.PixelFormat:=pf24bit;
+
+  Bmp.Width:=Bitmap.Width;
+  Bmp.Height:=Bitmap.Height;
+
+  BitBlt(Bmp.Canvas.Handle,0,0,Bmp.Width,Bmp.Height,Bitmap.Canvas.Handle,0,0,NOTSRCCOPY);
+  Bitmap.Assign(Bmp);
+end;   
+
+procedure TForm1.Img_PreMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  case m_ShutterType of
+    ERect:
+    begin
+      m_StartPt.X:=X;
+      m_StartPt.Y:=Y;
+    end ;
+    ECircle:
+    begin
+      m_StartPt.X:=X;
+      m_StartPt.Y:=Y;
+    end ;
+    EPoly:
+    begin
+      if  m_polyPtNum=0 then
+      begin
+        m_StartPt.X:=X;
+        m_StartPt.Y:=Y;
+      end;
+    end ;
+    ENone:
+    begin
+
+    end ;
+  end;
+
+end;
+
+procedure TForm1.Img_PreMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var
+  hpen:THandle;
+  hdc:THandle;
+begin
+  //hpen:=CreatePen(PS_SOLID,1,clYellow);
+  //hdc :=Img_Pre.Canvas.handle;
+
+  SetROP2(hdc, R2_MASKPEN);
+  SelectObject(hdc,  hpen);
+  SetBkMode(hdc,TRANSPARENT);
+
+  case m_ShutterType of
+    ERect:
+    begin
+      Rectangle(hdc,Trunc(m_StartPt.X),Trunc(m_StartPt.Y),X,Y);
+      //Self.Refresh;
+    end;
+    ECircle:
+    begin
+      Ellipse(hdc,Trunc(m_StartPt.X),Trunc(m_StartPt.Y),X,Y);
+      //Self.Refresh;
+    end;                    
+  end;
+end;
+
+procedure TForm1.Img_PreMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  I,J:Integer;
+  hpen:THandle;
+  hdc:THandle;
+begin
+  Img_Pre.Canvas.Pen.Color:=clRed;
+  case Button of
+    mbLeft:
+    begin
+      case m_ShutterType of
+        ERect:
+        begin
+         m_ShtHrgn:=CreateRectRgn(Trunc(m_StartPt.X),Trunc(m_StartPt.Y),X,Y);
+         m_ShutterType:=ENone;
+        end;
+        ECircle:
+        begin
+         m_ShtHrgn:=CreateEllipticRgn(Trunc(m_StartPt.X),Trunc(m_StartPt.Y),X,Y);
+         m_ShutterType:=ENone;
+        end;
+        EPoly:
+        begin
+          if Button=mbLeft then
+          begin
+            Inc(m_polyPtNum);
+            if m_polyPtNum<100 then
+            begin
+              m_polyPt[m_polyptNum-1].X:=X;
+              m_polyPt[m_polyptNum-1].Y:=Y;
+            end; 
+            if m_polyPtNum>=2 then
+            begin
+              Img_Pre.Canvas.MoveTo(Trunc(m_polyPt[m_polyptNum-2].X),
+                     Trunc(m_polyPt[m_polyptNum-2].Y));
+
+              Img_Pre.Canvas.LineTo(Trunc(m_polyPt[m_polyptNum-1].X),
+                     Trunc(m_polyPt[m_polyptNum-1].Y));
+            end;
+            Exit;
+          end;
+
+        end;
+        ENone:
+        begin
+          Exit;
+        end;
+      end;
+
+      for I := 0 to Img_Pre.Width - 1 do
+        for J := 0 to Img_Pre.Height - 1 do
+        begin
+          if not PtInRegion(m_ShtHrgn,I,J) then
+           Img_Pre.Canvas.Pixels[I,J]:=clBlack;
+        end;
+    end;
+    mbRight:
+    begin
+      if m_ShutterType = EPoly then
+      begin
+        Inc(m_polyPtNum);
+        m_polyPt[m_polyPtNum-1].X:=m_StartPt.X;
+        m_polyPt[m_polyPtNum-1].Y:=m_StartPt.Y;
+        m_ShtHrgn:=CreatePolygonRgn(m_polyPt,m_polyPtNum,WINDING);
+        m_ShutterType:=ENone;
+        for I := 0 to Img_Pre.Width - 1 do
+          for J := 0 to Img_Pre.Height - 1 do
+          begin
+            if not PtInRegion(m_ShtHrgn,I,J) then
+             Img_Pre.Canvas.Pixels[I,J]:=clBlack;
+          end;
+      end;
+
+    end;
+
+  end;
+
+end;
+
+end.
